@@ -4,7 +4,6 @@ import urllib.request
 import boto3
 import os
 
-# S3 高レベルAPI
 s3 = boto3.resource('s3')
 client = boto3.client('ses', region_name=os.environ['REGION'])
 
@@ -14,7 +13,7 @@ pattern_unconfirmed = ''
 def post_slack(webfook_url, message):
     
     send_data = {
-        "text": message,
+        "text": str(message),
     }
     
     send_text = json.dumps(send_data)
@@ -29,16 +28,10 @@ def post_slack(webfook_url, message):
 
 def lambda_handler(event, context):
     
-    # バケット名取得
-    bucket = event['Records'][0]['s3']['bucket']['name']
-    
-    # オブジェクトのkey取得
+    bucket = event['Records'][0]['s3']['bucket']['name']    
     key = urllib.parse.unquote_plus(event['Records'][0]['s3']['object']['key'])
-    
-    # オブジェクトを取得する
     s3_object = s3.Object(bucket, key)
  
-    # オブジェクトの内容を取得
     s3_object_response = s3_object.get()
     
     info_body = s3_object_response['Body'].read()
